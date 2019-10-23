@@ -1,0 +1,31 @@
+import socket
+from threading import Thread
+L=[]
+
+def ConversaSimultanea(a,b):
+    mensagem = ""
+    print("entrou no loop da conversa")
+    while mensagem != "Fim":
+        mensagem = L[a].recv(1024)
+        if not mensagem:
+            break
+        L[b].sendall(mensagem)
+    conn.close()
+    
+h = ("10.113.80.214")
+port = 3128
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # IPv4,tipo de socket
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+print("servidor IP= 10.113.80.214   HOST= 3128")
+server.bind((h, port))  # liga o socket com IP e porta
+server.listen(5)  # espera chegar pacotes na porta especificada
+print("server escutando")
+
+for i in range(2):
+    print("esperando o primeiro cliente conectar-se")
+    conn, addr = server.accept()  # as variaveis conn a addr sao preenchidas pela funcao accept
+    L.append(conn)
+    print("conectei e appendei o primeiro cliente")
+t1 = Thread(target=ConversaSimultanea, args=(1,0,)).start()
+t2 = Thread(target=ConversaSimultanea, args=(0,1,)).start()
